@@ -51,6 +51,36 @@ Optional arguments:
   reproducible runs, even between versions of Python. Default is `None`; i.e.,
   seeding based on the current system time, which is not reproducible.
 
+For example:
+
+~~~bash
+$ python assign_reviewers.py test_data/test-reviewers.csv test_data/test-submissions.csv 3 --reviewer_id_column 1 --max_reviews_column 4 --submission_id_column 0 --delimiter ',' --header_length 1 --seed 1
+~~~
+
+will give the output:
+
+~~~
+Submission assignments per reviewer:
+test1@example.net: 7, 24, 26, 5
+test2@example.net: 5, 21
+test3@example.net: 8, 23, 24, 26, 6
+test4@example.net: 22, 7, 21, 8, 10
+test5@example.net: 6, 10, 22, 23, 24, 26
+test6@example.net: 5, 6, 10, 21, 8, 7, 22, 23
+
+Reviewer assignments per submission:
+6: test3@example.net, test5@example.net, test6@example.net
+26: test1@example.net, test3@example.net, test5@example.net
+21: test2@example.net, test4@example.net, test6@example.net
+8: test3@example.net, test4@example.net, test6@example.net
+22: test4@example.net, test5@example.net, test6@example.net
+5: test1@example.net, test2@example.net, test6@example.net
+7: test1@example.net, test4@example.net, test6@example.net
+23: test3@example.net, test5@example.net, test6@example.net
+24: test1@example.net, test3@example.net, test5@example.net
+10: test4@example.net, test5@example.net, test6@example.net
+~~~
+
 ## Limitations
 
 In very constrained cases there may be scenarios where the algorithm runs out of
