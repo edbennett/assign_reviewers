@@ -11,6 +11,7 @@ def get_args():
     parser.add_argument('--reviewer_id_column', type=int, default=0)
     parser.add_argument('--max_reviews_column', type=int, default=1)
     parser.add_argument('--submission_id_column', type=int, default=0)
+    parser.add_argument('--submitter_id_column', type=int, default=None)
     parser.add_argument('--delimiter', default=',')
     parser.add_argument('--header_length', type=int, default=0)
     parser.add_argument('--seed', default=None)
@@ -29,21 +30,26 @@ def get_reviewers(
     return reviewer_max_subs
 
 
-def get_submissions(submissions_file, id_column, delimiter, header_length):
-    submissions = []
+def get_submissions(submissions_file, id_column, delimiter, header_length,
+                    submitter_column=None):
+    submissions = {}
     for idx, row in enumerate(reader(submissions_file, delimiter=delimiter)):
         if idx < header_length:
             continue
-        submissions.append(row[id_column])
+        submissions[row[id_column]] = (row[submitter_column]
+                                       if submitter_column else None)
     return submissions
 
 
-def get_eligible_reviewers(submission, reviewer_max_subs, reviewer_subs):
+def get_eligible_reviewers(
+        submission, submitter, reviewer_max_subs, reviewer_subs
+):
     eligible_reviewers = [
         reviewer
         for reviewer in reviewer_subs
         for _ in range(reviewer_max_subs[reviewer] - len(reviewer_subs[reviewer]))
-        if submission not in reviewer_subs[reviewer]
+        if (submission not in reviewer_subs[reviewer])
+        and (reviewer != submitter)
     ]
     if not eligible_reviewers:
         raise RuntimeError(
@@ -57,9 +63,9 @@ def assign_reviewers(submissions, reviewer_max_subs, reviews_per_submission):
     reviewer_subs = {reviewer: [] for reviewer in reviewer_max_subs}
 
     for _ in range(reviews_per_submission):
-        for submission in submissions:
+        for submission, submitter in submissions.items():
             eligible_reviewers = get_eligible_reviewers(
-                submission, reviewer_max_subs, reviewer_subs
+                submission, submitter, reviewer_max_subs, reviewer_subs
             )
             reviewer_subs[choice(eligible_reviewers)].append(submission)
 
@@ -105,7 +111,8 @@ def main():
     )
     submissions = get_submissions(
         args.submissions_file, args.submission_id_column,
-        args.delimiter, args.header_length
+        args.delimiter, args.header_length,
+        submitter_column=args.submitter_id_column
     )
     check_viability(
         submissions,
