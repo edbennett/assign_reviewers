@@ -92,7 +92,7 @@ def print_subs_per_reviewer(reviewer_subs):
 def print_reviewers_per_sub(reviewer_subs):
     submissions = set([sub for subs in reviewer_subs.values() for sub in subs])
     print("Reviewer assignments per submission:")
-    for submission in submissions:
+    for submission in sorted(submissions):
         sub_reviewers = [
             reviewer
             for reviewer, this_reviewer_subs in reviewer_subs.items()
